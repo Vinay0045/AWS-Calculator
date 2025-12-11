@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="calculator-container">
+        <div class="display">
+            <span id="result">0</span>
+        </div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button class="operator" onclick="appendCharacter('(')">(</button>
+            <button class="operator" onclick="appendCharacter(')')">)</button>
+            <button class="operator" onclick="appendCharacter('/')">÷</button>
+
+            <button onclick="appendCharacter('7')">7</button>
+            <button onclick="appendCharacter('8')">8</button>
+            <button onclick="appendCharacter('9')">9</button>
+            <button class="operator" onclick="appendCharacter('*')">×</button>
+
+            <button onclick="appendCharacter('4')">4</button>
+            <button onclick="appendCharacter('5')">5</button>
+            <button onclick="appendCharacter('6')">6</button>
+            <button class="operator" onclick="appendCharacter('-')">-</button>
+
+            <button onclick="appendCharacter('1')">1</button>
+            <button onclick="appendCharacter('2')">2</button>
+            <button onclick="appendCharacter('3')">3</button>
+            <button class="operator" onclick="appendCharacter('+')">+</button>
+
+            <button onclick="appendCharacter('0')">0</button>
+            <button onclick="appendCharacter('.')">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        const display = document.getElementById('result');
+
+        function updateDisplay(value) {
+            display.innerText = value || '0';
+        }
+
+        function appendCharacter(char) {
+            currentExpression += char;
+            updateDisplay(currentExpression);
+        }
+
+        function clearDisplay() {
+            currentExpression = '';
+            updateDisplay(currentExpression);
+        }
+
+        async function calculate() {
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ expression: currentExpression })
+                });
+
+                const data = await response.json();
+
+                if (data.result === 'Error') {
+                    currentExpression = '';
+                    updateDisplay('Error');
+                } else {
+                    currentExpression = data.result.toString();
+                    updateDisplay(currentExpression);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                updateDisplay('Error');
+                currentExpression = '';
+            }
+        }
+    </script>
+</body>
+
+</html>
